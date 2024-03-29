@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3학년 3반 자리배치 프로그램</title>
+<style>
+  .seat {
+    width: 70px;
+    height: 70px;
+    border: 1px solid black;
+    display: inline-block;
+    margin: 5px;
+    text-align: center;
+    line-height: 70px;
+    cursor: pointer;
+    font-size: 0.8em;
+  }
+</style>
+</head>
+<body>
+  <h1>3학년 3반 자리배치 프로그램</h1>
+  <p>좌석을 클릭하여 고정할 수 있습니다.</p>
+  <label for="fixedStudents">고정된 학생 번호:</label>
+  <input type="text" id="fixedStudents" placeholder="예: 4, 17">
+  <button id="randomizeButton">랜덤으로 배치하기</button>
+  <div id="seatingArrangement"></div>
+
+<script>
+  const rows = 5;
+  const cols = 5;
+  const totalStudents = 25;
+
+  const seatingArrangement = document.getElementById('seatingArrangement');
+  const randomizeButton = document.getElementById('randomizeButton');
+
+  const seats = [];
+  for (let i = 0; i < rows * cols; i++) {
+    seats.push({ index: i, fixed: false });
+  }
+
+  function seatClickHandler(index) {
+    const seat = seats[index];
+    seat.fixed = !seat.fixed;
+    renderSeatingArrangement();
+  }
+
+  function randomizeSeats() {
+    const fixedStudentNumbersInput = document.getElementById('fixedStudents').value;
+    const fixedStudentNumbers = fixedStudentNumbersInput.split(',').map(num => parseInt(num.trim()));
+
+    const availableSeats = seats.filter((seat, index) => !seat.fixed);
+    const availableStudents = [];
+    for (let i = 1; i <= totalStudents; i++) {
+      if (!fixedStudentNumbers.includes(i)) {
+        availableStudents.push(i);
+      }
+    }
+    availableStudents.sort(() => Math.random() - 0.5);
+
+    let studentIndex = 0;
+    seats.forEach((seat, index) => {
+      if (!seat.fixed) {
+        if (studentIndex < availableStudents.length) {
+          seat.student = '학생 ' + availableStudents[studentIndex++];
+        } else {
+          seat.student = '';
+        }
+      } else {
+        seat.student = '고정';
+      }
+    });
+
+    renderSeatingArrangement();
+  }
+
+  function renderSeatingArrangement() {
+    seatingArrangement.innerHTML = '';
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const seatIndex = i * cols + j;
+        const seat = document.createElement('div');
+        seat.classList.add('seat');
+        seat.textContent = '자리 ' + (seatIndex + 1);
+        if (seats[seatIndex].fixed) {
+          seat.style.backgroundColor = 'lightblue';
+          seat.textContent = '고정';
+        } else if (seats[seatIndex].student) {
+          seat.textContent = seats[seatIndex].student;
+        }
+        seat.addEventListener('click', () => seatClickHandler(seatIndex));
+        seatingArrangement.appendChild(seat);
+      }
+      seatingArrangement.appendChild(document.createElement('br'));
+    }
+  }
+
+  randomizeButton.addEventListener('click', randomizeSeats);
+  renderSeatingArrangement();
+</script>
+</body>
+</html>
